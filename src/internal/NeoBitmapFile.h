@@ -194,7 +194,8 @@ public:
         uint16_t indexPixel,
         int16_t xSrc,
         int16_t ySrc,
-        int16_t wSrc)
+        int16_t wSrc,
+        bool mirror = false)
     {
         const uint16_t destPixelCount = destBuffer.PixelCount();
         typename T_COLOR_FEATURE::ColorObject color(0);
@@ -212,8 +213,10 @@ public:
                         xSrc++;
                     }
                 }
-
-                T_COLOR_FEATURE::applyPixelColor(destBuffer.Pixels, indexPixel, color);
+                if(mirror) //flip horizontally (reversing animation)
+                    T_COLOR_FEATURE::applyPixelColor(destBuffer.Pixels, ((destPixelCount -1) - indexPixel), color);
+                else
+                    T_COLOR_FEATURE::applyPixelColor(destBuffer.Pixels, indexPixel, color);
             }
         }
     }

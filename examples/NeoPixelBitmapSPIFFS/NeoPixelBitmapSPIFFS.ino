@@ -42,7 +42,7 @@ void LoopAnimUpdate(const AnimationParam& param)
     if (param.state == AnimationState_Completed)
     {
         // done, time to restart this position tracking animation/timer
-        animations.RestartAnimation(param.index);
+        animations.RestartAnimation(param.index, animSpeed);
 
         // draw the complete row at animState to the complete strip
         image.Blt(strip, 0, 0, animState, image.Width(), animDir, animMask);

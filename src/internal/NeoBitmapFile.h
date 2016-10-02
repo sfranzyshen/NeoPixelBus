@@ -102,9 +102,9 @@ public:
 
         BitmapFileHeader bmpHeader;
         BitmapInfoHeader bmpInfoHeader;
-        size_t result;
+        int result;
 
-        result = _file.read((uint8_t*)(&bmpHeader), sizeof(bmpHeader));
+        result = _file.read((uint8_t*)&bmpHeader, sizeof(bmpHeader));
 
         if (result != sizeof(bmpHeader) ||
             bmpHeader.FileId != c_BitmapFileId ||
@@ -113,7 +113,7 @@ public:
             goto error;
         }
 
-        result = _file.read((uint8_t*)(&bmpInfoHeader), sizeof(bmpInfoHeader));
+        result = _file.read((uint8_t*)&bmpInfoHeader, sizeof(bmpInfoHeader));
 
         if (result != sizeof(bmpInfoHeader) ||
             result != bmpInfoHeader.Size ||
@@ -195,7 +195,8 @@ public:
         int16_t xSrc,
         int16_t ySrc,
         int16_t wSrc,
-        bool mirror = false)
+	bool mirror = false,
+	RgbColor colorMask = NULL)
     {
         const uint16_t destPixelCount = destBuffer.PixelCount();
         typename T_COLOR_FEATURE::ColorObject color(0);
@@ -208,15 +209,16 @@ public:
             {
                 if (xSrc < _width)
                 {
-                    if (readPixel(&color))
+                    if (readPixel(&color, colorMask))
                     {
                         xSrc++;
                     }
                 }
-                if(mirror) //flip horizontally (reversing animation)
-                    T_COLOR_FEATURE::applyPixelColor(destBuffer.Pixels, ((destPixelCount -1) - indexPixel), color);
-                else
-                    T_COLOR_FEATURE::applyPixelColor(destBuffer.Pixels, indexPixel, color);
+
+		if(mirror)
+			T_COLOR_FEATURE::applyPixelColor(destBuffer.Pixels, ((destPixelCount -1) - indexPixel), color);
+		else
+	                T_COLOR_FEATURE::applyPixelColor(destBuffer.Pixels, indexPixel, color);
             }
         }
     }
@@ -310,22 +312,29 @@ private:
         return _file.seek(pos);
     };
 
-    bool readPixel(RgbColor* color)
+    bool readPixel(RgbColor* color, RgbColor mask = NULL)
     {
         uint8_t bgr[4];
         int result;
 
-        result = _file.read(bgr, _bytesPerPixel);
+        result = _file.read((uint8_t*)bgr, _bytesPerPixel);
 
         if (result != _bytesPerPixel)
         {
             *color = 0;
             return false;
         }
-
-        color->B = bgr[0];
-        color->G = bgr[1];
-        color->R = bgr[2];
+	if(mask != NULL)
+	{
+	        color->B = map(mask.B, 0, 255, 0, bgr[0]);
+	        color->G = map(mask.G, 0, 255, 0, bgr[1]);
+	        color->R = map(mask.R, 0, 255, 0, bgr[2]);
+	} else 
+	{
+        	color->B = bgr[0];
+        	color->G = bgr[1];
+        	color->R = bgr[2];
+	}
 
         return true;
     };
@@ -336,7 +345,7 @@ private:
         int result;
 
         bgr[3] = 0; // init white channel as read maybe only 3 bytes
-        result = _file.read(bgr, _bytesPerPixel);
+        result = _file.read((uint8_t*)bgr, _bytesPerPixel);
 
         if (result != _bytesPerPixel)
         {

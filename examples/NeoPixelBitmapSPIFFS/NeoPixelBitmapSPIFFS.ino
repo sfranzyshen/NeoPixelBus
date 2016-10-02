@@ -1,6 +1,6 @@
 // NeoBitmapFileSPIFFS
 // This example will animate pixels using a bitmap stored on a  
-// 
+// SPIFFS filesystem
 //
 // This will demonstrate the use of the NeoBitmapFile object 
 // NOTE:  The images provided in the example directory should be copied to

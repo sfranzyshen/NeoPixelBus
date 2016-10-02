@@ -79,14 +79,17 @@ public:
 
     void StartAnimation(uint16_t indexAnimation, uint16_t duration, AnimUpdateCallback animUpdate);
     void StopAnimation(uint16_t indexAnimation);
-    void RestartAnimation(uint16_t indexAnimation)
+    void RestartAnimation(uint16_t indexAnimation, uint16_t duration = NULL)
     {
         if (indexAnimation >= _countAnimations || _animations[indexAnimation]._duration == 0)
         {
             return;
         }
 
-        StartAnimation(indexAnimation, _animations[indexAnimation]._duration, (_animations[indexAnimation]._fnCallback));
+	if(duration != NULL)
+	        StartAnimation(indexAnimation, duration, (_animations[indexAnimation]._fnCallback));
+	else
+        	StartAnimation(indexAnimation, _animations[indexAnimation]._duration, (_animations[indexAnimation]._fnCallback));
     }
 
     bool IsAnimationActive(uint16_t indexAnimation) const

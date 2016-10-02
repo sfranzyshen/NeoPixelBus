@@ -1,6 +1,6 @@
 // NeoBitmapFileSPIFFS
-// This example will animate pixels using a bitmap stored on a  
-// SPIFFS filesystem
+// This example will animate pixels using a bitmap stored on a SPIFFS filesystem
+// 
 //
 // This will demonstrate the use of the NeoBitmapFile object 
 // NOTE:  The images provided in the example directory should be copied to
@@ -30,7 +30,10 @@ NeoPixelAnimator animations(AnimCount); // NeoPixel animation management object
 NeoBitmapFile<MyPixelColorFeature, File> image;
 
 uint16_t animState = 0;
-bool animDir = true; //change this to reverse the animation direction
+uint16_t animSpeed = 50;//change the animation speed playback
+bool animDir = true; //change this to reverse the animation direction (flips image horizontally)
+//RgbColor animMask = RgbColor(128, 255, 0); //change this to mask a color over grey scale images (to tint them) 
+RgbColor animMask = NULL;//or leave it NULL
 
 void LoopAnimUpdate(const AnimationParam& param)
 {
@@ -42,7 +45,7 @@ void LoopAnimUpdate(const AnimationParam& param)
         animations.RestartAnimation(param.index);
 
         // draw the complete row at animState to the complete strip
-        image.Blt(strip, 0, 0, animState, image.Width(), animDir);
+        image.Blt(strip, 0, 0, animState, image.Width(), animDir, animMask);
         animState = (animState + 1) % image.Height(); // increment and wrap
     }
 }
@@ -80,7 +83,7 @@ void setup() {
     //File bitmapFile = SPIFFS.open("/white_chase_16.bmp", "r"); 
     //File bitmapFile = SPIFFS.open("/white_comet_16.bmp", "r"); 
     //File bitmapFile = SPIFFS.open("/white_sparkle_16.bmp", "r"); 
-
+    //File bitmapFile = SPIFFS.open("/rainbow_long_16.bmp", "r");
     if (!bitmapFile)
     {
         Serial.println("File open fail, or not present");
@@ -98,7 +101,7 @@ void setup() {
 
     //animState = 0;
     // we use the index 0 animation to time how often we rotate all the pixels
-    animations.StartAnimation(0, 50, LoopAnimUpdate);
+    animations.StartAnimation(0, animSpeed, LoopAnimUpdate);
 }
 
 void loop() {
